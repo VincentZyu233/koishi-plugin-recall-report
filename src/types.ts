@@ -33,11 +33,10 @@ export const Config: Schema<Config> = Schema.intersect([
     masterAccounts: Schema.array(Schema.object({
       platform: Schema.string()
         .description('平台名称，如 onebot')
-        .default('onebot')
-        .required(),
+        .default('onebot'),
       userId: Schema.string()
         .description('用户ID')
-        .required(),
+        .default('1830540513'),
       enabled: Schema.boolean()
         .description('是否启用')
         .default(true),
@@ -54,7 +53,7 @@ export const Config: Schema<Config> = Schema.intersect([
         .default(true),
       channelId: Schema.string()
         .description('群号（OneBot channelId）')
-        .required(),
+        .default('259248174'),
       sendToMaster: Schema.boolean()
         .description('是否发送到主人账号')
         .default(true),

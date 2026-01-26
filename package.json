@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-onebot-recall-report",
   "description": "监控群撤回并上报给主人账号捏",
-  "version": "0.0.1",
+  "version": "0.0.1-beta.2+20260126",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
