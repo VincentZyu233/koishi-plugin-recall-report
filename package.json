@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-recall-report",
   "description": "Satori 全平台消息撤回监听与自适应审计报告插件",
-  "version": "0.2.0-beta.1+20261120",
+  "version": "0.3.0-beta.1+20261120",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -22,6 +22,8 @@
     "recall",
     "revoke",
     "audit",
+    "takumi",
+    "wasm",
     "onebot",
     "discord",
     "kook",
@@ -29,5 +31,9 @@
   ],
   "peerDependencies": {
     "koishi": "^4.18.7"
+  },
+  "dependencies": {
+    "@takumi-rs/helpers": "^2.22.0",
+    "@takumi-rs/wasm": "^2.22.0"
   }
 }
