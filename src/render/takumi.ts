@@ -1,8 +1,10 @@
 import { Renderer } from '@takumi-rs/wasm/node'
 import { container, text } from '@takumi-rs/helpers'
-import { Context } from 'koishi'
+import { Context, Logger } from 'koishi'
 import { StoredMessage } from '../types'
-import { resolveFontData } from './font'
+import { resolveRenderFontBuffer } from '../utils/font'
+
+const logger = new Logger('recall-report:takumi')
 
 export interface TakumiRenderOptions {
   width?: number
@@ -15,22 +17,35 @@ export interface TakumiRenderOptions {
 let rendererInstance: Renderer | null = null
 let loadedFontSignature: string | null = null
 
-async function getRenderer(ctx: Context, customFontPath?: string): Promise<Renderer> {
-  const fontData = await resolveFontData(ctx, customFontPath)
-  const signature = `${customFontPath || 'lxgw-default'}-${fontData.length}`
+/**
+ * 获取或创建 Takumi 渲染器实例并确保注册中文字体
+ * 注意：@takumi-rs/wasm 2.x 不通过构造函数传递 fonts，必须调用 registerFont 进行字体注册！
+ */
+async function getTakumiRenderer(ctx: Context, customFontPath?: string): Promise<Renderer> {
+  const fontData = await resolveRenderFontBuffer(ctx, customFontPath)
+  const signature = `${customFontPath || 'lxgw-managed'}-${fontData.length}`
 
   if (!rendererInstance || loadedFontSignature !== signature) {
-    rendererInstance = new (Renderer as any)({ fonts: [fontData] })
+    logger.info(`[Takumi] 正在初始化 Takumi WASM 渲染器并注册中文字体 (${fontData.length} bytes)...`)
+    const renderer = new Renderer()
+    try {
+      const registered = await renderer.registerFont(fontData)
+      logger.info(`[Takumi] 中文字体成功注册！已加载字系:`, registered.map(f => f.name).join(', '))
+    } catch (err) {
+      logger.error('[Takumi] 注册中文字体失败:', err)
+      throw err
+    }
+    rendererInstance = renderer
     loadedFontSignature = signature
   }
 
-  return rendererInstance!
+  return rendererInstance
 }
 
 /**
- * 使用 Takumi WASM 渲染精美的撤回审计报告卡片大图
+ * 使用 Takumi WASM 渲染精美的高清撤回审计报告卡片大图
  */
-export async function renderRecallCard(
+export async function renderTakumiCard(
   ctx: Context,
   storedMsg: StoredMessage,
   options: TakumiRenderOptions
@@ -237,7 +252,7 @@ export async function renderRecallCard(
     ]
   })
 
-  const renderer = await getRenderer(ctx, options.fontPath)
+  const renderer = await getTakumiRenderer(ctx, options.fontPath)
   const rendered = await renderer.render(rootNode, { width, format: 'png' })
   return Buffer.from(rendered)
 }

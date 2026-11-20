@@ -1,8 +1,8 @@
 import { Context, Logger } from 'koishi'
 import { Config } from './types'
-import { Utils } from './utils'
+import { Utils, ensureLxgwFontBuffer } from './utils'
 import { MessageStorage } from './storage'
-import { RecallRenderer } from './renderer'
+import { RecallRenderer } from './render'
 import { registerEvents } from './events'
 import { registerCommands } from './commands'
 import { usage } from './usage'
@@ -30,6 +30,11 @@ export function apply(ctx: Context, config: Config) {
 
   // 5. 注册用户指令
   registerCommands(ctx, config, utils, storage)
+
+  // 6. 异步预热/预下载 Takumi 中文字体（后台静默进行，不阻塞启动）
+  ensureLxgwFontBuffer(ctx).catch(err => {
+    logger.warn('预热加载 LXGW 文楷字体遇到异常，将在出图时重试:', err)
+  })
 
   logger.info(`recall-report 插件加载就绪，当前共监听 ${utils.getEnabledGroupCount()} 个群组/频道`)
 }
