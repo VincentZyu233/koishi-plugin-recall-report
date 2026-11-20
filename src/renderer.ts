@@ -19,7 +19,7 @@ export class RecallRenderer {
   async dispatchRecallReport(session: Session, storedMsg: StoredMessage, groupConfig: GroupConfig): Promise<void> {
     const modes = Array.isArray(this.config.reportModes) && this.config.reportModes.length > 0
       ? this.config.reportModes
-      : ['text-and-image', 'forward']
+      : ['text-and-image', 'forward', 'takumi']
 
     logger.info(`[${storedMsg.platform}] 收到 ${storedMsg.username}(${storedMsg.userId}) 消息撤回，准备执行交付模式: ${modes.join(', ')}`)
 

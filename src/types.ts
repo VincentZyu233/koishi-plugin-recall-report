@@ -95,7 +95,7 @@ export const Config: Schema<Config> = Schema.intersect([
       Schema.const('forward' as const).description('📑【forward】合并转发：QQ 合并转发卡片 / 其它平台引用文本'),
       Schema.const('takumi' as const).description('🦀【takumi】Takumi 出图：极速 WASM 渲染精美卡片大图'),
     ])).role('checkbox')
-      .default(['text-and-image', 'forward'])
+      .default(['text-and-image', 'forward', 'takumi'])
       .description('📢 报告消息形式（多选：勾选几个就发送几条独立消息，最多 3 条）'),
 
     takumiWidth: Schema.number()
@@ -111,7 +111,9 @@ export const Config: Schema<Config> = Schema.intersect([
     takumiFontPath: Schema.string()
       .default('')
       .description('🔤 自定义中文字体绝对路径 (留空将自动从工作区或系统依次探测)'),
+  }).description('⚙️ 交付形式与渲染引擎设置'),
 
+  Schema.object({
     messageSaveDuration: Schema.number()
       .description('消息内存保存时长（秒，超时后自动清理释放内存）')
       .default(3600)
@@ -123,7 +125,7 @@ export const Config: Schema<Config> = Schema.intersect([
       .default(1000)
       .min(100)
       .max(50000),
-  }).description('⚙️ 交付形式与渲染引擎设置'),
+  }).description('💾 内存缓存管理设置'),
 ])
 
 /** 内存中存储的标准消息实体 */
