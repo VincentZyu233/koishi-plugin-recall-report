@@ -81,10 +81,16 @@ export class RecallRenderer {
           // 2. 其次从全部 bots 中筛选状态为 online 的对应平台 Bot
           // 3. 彻底避免误选离线或未连接的同平台 Bot 实例
           let targetBot: Bot | undefined
-          if (session.bot && session.bot.platform === master.platform && (session.bot.status === 'online' || (session.bot as any).isActive)) {
+          const isOnline = (b?: Bot) => {
+            if (!b) return false
+            const st: any = b.status
+            return st === 1 || st === 'online' || st === 'ONLINE' || Boolean((b as any).isActive)
+          }
+
+          if (session.bot && session.bot.platform === master.platform && isOnline(session.bot)) {
             targetBot = session.bot
           } else {
-            targetBot = this.ctx.bots.find(b => b.platform === master.platform && (b.status === 'online' || (b as any).isActive))
+            targetBot = this.ctx.bots.find(b => b.platform === master.platform && isOnline(b))
               || (session.bot?.platform === master.platform ? session.bot : undefined)
               || this.ctx.bots.find(b => b.platform === master.platform)
           }
