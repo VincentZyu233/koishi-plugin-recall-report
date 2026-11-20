@@ -2,7 +2,7 @@ import { Renderer } from '@takumi-rs/wasm/node'
 import { container, text } from '@takumi-rs/helpers'
 import { Context, Logger } from 'koishi'
 import { StoredMessage } from '../types'
-import { resolveRenderFontBuffer } from '../utils/font'
+import { resolveRenderFontBuffer } from '../font'
 
 const logger = new Logger('recall-report:takumi')
 

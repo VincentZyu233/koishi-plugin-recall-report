@@ -1,6 +1,7 @@
 import { Context, Logger } from 'koishi'
 import { Config } from './types'
-import { Utils, ensureLxgwFontBuffer } from './utils'
+import { Utils } from './utils'
+import { ensureLxgwFontBuffer } from './font'
 import { MessageStorage } from './storage'
 import { RecallRenderer } from './render'
 import { registerEvents } from './events'
