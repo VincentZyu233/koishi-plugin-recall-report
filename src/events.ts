@@ -39,11 +39,12 @@ export function registerEvents(
     }
 
     storage.saveMessage(stored)
+    logger.info(`[message] 已缓存群消息 [${session.platform}:${session.channelId}] 来自 ${stored.username}(${session.userId}): ${session.messageId}`)
   })
 
   // ==================== 2. 监听 Satori 标准撤回事件 ====================
   ctx.on('message-deleted', async (session) => {
-    logger.debug(`[message-deleted] 收到撤回事件: platform=${session.platform}, channelId=${session.channelId}, messageId=${session.messageId}`)
+    logger.info(`[message-deleted] 捕获撤回事件: platform=${session.platform}, channelId=${session.channelId}, messageId=${session.messageId}, operator=${session.userId}`)
 
     // 通用公域判定：解耦 subtype === 'group' 硬编码
     const isGuildRecall = !session.isDirect || Boolean(session.guildId) || session.subtype === 'group'
@@ -52,15 +53,26 @@ export function registerEvents(
     // 检查是否命中群组配置
     const groupConfig = utils.matchGroupConfig(session.platform, session.channelId)
     if (!groupConfig) {
-      logger.debug(`[${session.platform}] 群/频道 ${session.channelId} 未启用撤回监听`)
+      logger.info(`[${session.platform}] 群/频道 ${session.channelId} 未在监听白名单中，跳过审计`)
       return
     }
 
     // 查找被撤回的消息实体
-    const storedMsg = storage.getMessage(session.platform, session.channelId, session.messageId)
+    let storedMsg = storage.getMessage(session.platform, session.channelId, session.messageId)
     if (!storedMsg) {
-      logger.debug(`[${session.platform}] 未找到被撤回的消息缓存: ${session.messageId}`)
-      return
+      logger.warn(`[${session.platform}] 未命中被撤回消息缓存 (可能已被清空缓存或发送时未在运行): ${session.messageId}，正在生成基础撤回审计...`)
+      storedMsg = {
+        platform: session.platform,
+        channelId: session.channelId,
+        guildId: session.guildId,
+        messageId: session.messageId,
+        userId: session.userId,
+        username: session.author?.name || session.username || session.userId,
+        avatar: utils.resolveUserAvatar(session),
+        content: '（⚠️ 未命中本地消息缓存，原消息内容不可查）',
+        elements: [],
+        timestamp: session.timestamp - 1000,
+      }
     }
 
     // 调用渲染引擎分发

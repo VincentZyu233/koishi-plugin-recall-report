@@ -76,11 +76,25 @@ export class RecallRenderer {
       const masters = this.utils.getEnabledMasters()
       for (const master of masters) {
         try {
-          const targetBot = this.ctx.bots.find(b => b.platform === master.platform)
+          // 核心修复：多 Bot 场景优先使用在线且正常运行的 Bot
+          // 1. 优先使用当前捕获撤回事件的 session.bot（如果属于对应平台且在线）
+          // 2. 其次从全部 bots 中筛选状态为 online 的对应平台 Bot
+          // 3. 彻底避免误选离线或未连接的同平台 Bot 实例
+          let targetBot: Bot | undefined
+          if (session.bot && session.bot.platform === master.platform && (session.bot.status === 'online' || (session.bot as any).isActive)) {
+            targetBot = session.bot
+          } else {
+            targetBot = this.ctx.bots.find(b => b.platform === master.platform && (b.status === 'online' || (b as any).isActive))
+              || (session.bot?.platform === master.platform ? session.bot : undefined)
+              || this.ctx.bots.find(b => b.platform === master.platform)
+          }
+
           if (!targetBot) {
             logger.warn(`未找到接收平台 [${master.platform}] 的可用 Bot 实例，跳过向主人上报`)
             continue
           }
+
+          logger.info(`向主人 [${master.platform}:${master.userId}] 选用 Bot [${targetBot.selfId}] (状态: ${targetBot.status}) 投递撤回报告`)
 
           await this.sendDeliveries(targetBot, master.userId, true, {
             modes,
