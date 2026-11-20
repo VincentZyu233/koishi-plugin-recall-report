@@ -62,17 +62,4 @@ export const usage = `
     </ul>
   </div>
 </details>
-
-<details style="${detailsStyle}">
-  <summary style="${summaryStyle}">📋 更新日志 (Changelog)</summary>
-  <div style="${detailsBodyStyle}">
-    <p><b>v0.3.0-beta.1+20261120</b></p>
-    <ul>
-      <li>🦀 <b>新增 Takumi WASM 出图模式</b>：毫秒级生成结构化撤回报告大图，支持暗色主题与自定义字体。</li>
-      <li>🎛️ <b>交付模式多选解耦</b>：废除旧 <code>preferForward</code> 属性，引入 <code>reportModes</code> 多选框（<code>text-and-image</code> / <code>forward</code> / <code>takumi</code>），选几项发几条独立消息。</li>
-      <li>🔕 <b>默认静音更安全</b>：<code>groupConfigs.sendToGroup</code> 默认值改为 <code>false</code>，仅发送主人，杜绝群内刷屏。</li>
-      <li>✏️ <b>文案细节规范</b>：主人账号平台名称统一增加全角括号说明。</li>
-    </ul>
-  </div>
-</details>
 `
