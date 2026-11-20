@@ -126,41 +126,77 @@ export class RecallRenderer {
       storedMsg: StoredMessage
     }
   ): Promise<void> {
-    // 交付 1: 图文消息
-    if (payload.modes.includes('text-and-image') && payload.textAvatarMessage) {
-      await this.sendMessage(bot, targetId, isDirect, payload.textAvatarMessage)
-      await new Promise(r => setTimeout(r, 120))
-    }
+    const isQuoteForwardActive = Boolean(this.config.quoteForward)
+      && payload.modes.includes('forward')
+      && payload.modes.length >= 2
 
-    // 交付 2: Takumi WASM 渲染大图
-    if (payload.modes.includes('takumi') && payload.takumiMessage) {
-      await this.sendMessage(bot, targetId, isDirect, payload.takumiMessage)
-      await new Promise(r => setTimeout(r, 120))
-    }
+    if (isQuoteForwardActive) {
+      // 激活引用转发模式：优先发送 forward 卡片，获取消息 ID，后续消息携带 h.quote 引用该卡片
+      let forwardMsgId: string | null = null
+      try {
+        const forwardMsg = renderForward(bot, payload.storedMsg, payload.rawElements)
+        const forwardIds = await this.sendMessage(bot, targetId, isDirect, forwardMsg)
+        if (Array.isArray(forwardIds) && forwardIds.length > 0) {
+          forwardMsgId = forwardIds[0]
+        }
+        await new Promise(r => setTimeout(r, 150))
+      } catch (err) {
+        logger.warn(`优先发送 forward 消息失败，后续降级为普通无引用发送:`, err)
+      }
 
-    // 交付 3: 合并转发卡片 / 引用文本
-    if (payload.modes.includes('forward')) {
-      const forwardMsg = renderForward(bot, payload.storedMsg, payload.rawElements)
-      await this.sendMessage(bot, targetId, isDirect, forwardMsg)
-      await new Promise(r => setTimeout(r, 120))
+      // 后续 1: 图文消息 (若勾选)
+      if (payload.modes.includes('text-and-image') && payload.textAvatarMessage) {
+        const toSend = forwardMsgId
+          ? [h.quote(forwardMsgId), ...payload.textAvatarMessage]
+          : payload.textAvatarMessage
+        await this.sendMessage(bot, targetId, isDirect, toSend)
+        await new Promise(r => setTimeout(r, 120))
+      }
+
+      // 后续 2: Takumi WASM 渲染大图 (若勾选)
+      if (payload.modes.includes('takumi') && payload.takumiMessage) {
+        const toSend = forwardMsgId
+          ? [h.quote(forwardMsgId), ...payload.takumiMessage]
+          : payload.takumiMessage
+        await this.sendMessage(bot, targetId, isDirect, toSend)
+        await new Promise(r => setTimeout(r, 120))
+      }
+    } else {
+      // 常规平级模式：按图文 -> Takumi -> 合并转发顺序发送
+      if (payload.modes.includes('text-and-image') && payload.textAvatarMessage) {
+        await this.sendMessage(bot, targetId, isDirect, payload.textAvatarMessage)
+        await new Promise(r => setTimeout(r, 120))
+      }
+
+      if (payload.modes.includes('takumi') && payload.takumiMessage) {
+        await this.sendMessage(bot, targetId, isDirect, payload.takumiMessage)
+        await new Promise(r => setTimeout(r, 120))
+      }
+
+      if (payload.modes.includes('forward')) {
+        const forwardMsg = renderForward(bot, payload.storedMsg, payload.rawElements)
+        await this.sendMessage(bot, targetId, isDirect, forwardMsg)
+        await new Promise(r => setTimeout(r, 120))
+      }
     }
   }
 
   /**
-   * 底层消息下发封装
+   * 底层消息下发封装，返回发送成功后的消息 ID 数组
    */
-  private async sendMessage(bot: Bot, targetId: string, isDirect: boolean, content: h | h[]): Promise<void> {
+  private async sendMessage(bot: Bot, targetId: string, isDirect: boolean, content: h | h[]): Promise<string[]> {
     if (isDirect) {
       if (typeof bot.createDirectChannel === 'function') {
         const channel = await bot.createDirectChannel(targetId)
-        await bot.sendMessage(channel.id, content)
+        return await bot.sendMessage(channel.id, content)
       } else if (typeof bot.sendPrivateMessage === 'function') {
-        await bot.sendPrivateMessage(targetId, content)
+        const res = await (bot as any).sendPrivateMessage(targetId, content)
+        return Array.isArray(res) ? res : res ? [res] : []
       } else {
-        await bot.sendMessage(targetId, content)
+        return await bot.sendMessage(targetId, content)
       }
     } else {
-      await bot.sendMessage(targetId, content)
+      return await bot.sendMessage(targetId, content)
     }
   }
 }

@@ -45,6 +45,8 @@ export interface Config {
   takumiDarkMode: boolean
   /** Takumi 自定义中文字体路径 */
   takumiFontPath?: string
+  /** 引用合并转发消息（当且仅当开启 forward 且模式 ≥ 2 种时生效，后续图文/Takumi 消息将引用该转发卡片） */
+  quoteForward: boolean
 }
 
 /** 配置 Schema */
@@ -111,6 +113,10 @@ export const Config: Schema<Config> = Schema.intersect([
     takumiFontPath: Schema.string()
       .default('')
       .description('🔤 Takumi 自定义字体路径；留空时自动下载并使用 LXGW 文楷'),
+
+    quoteForward: Schema.boolean()
+      .default(true)
+      .description('🔗 引用合并转发卡片（当且仅当包含 forward 且模式 ≥ 2 种时生效，后续图文/Takumi 消息将直接引用该转发卡片）'),
   }).description('⚙️ 交付形式与渲染引擎设置'),
 
   Schema.object({
