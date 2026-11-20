@@ -1,5 +1,6 @@
 import { Renderer } from '@takumi-rs/wasm/node'
 import { container, text } from '@takumi-rs/helpers'
+import { Context } from 'koishi'
 import { StoredMessage } from '../types'
 import { resolveFontData } from './font'
 
@@ -14,13 +15,10 @@ export interface TakumiRenderOptions {
 let rendererInstance: Renderer | null = null
 let loadedFontSignature: string | null = null
 
-function getRenderer(customFontPath?: string): Renderer {
-  const fontData = resolveFontData(customFontPath)
-  if (!fontData) {
-    throw new Error('Takumi 渲染未找到可用中文字体文件，请在配置中指定 takumiFontPath 或在 data/fonts 放置中文字体')
-  }
+async function getRenderer(ctx: Context, customFontPath?: string): Promise<Renderer> {
+  const fontData = await resolveFontData(ctx, customFontPath)
+  const signature = `${customFontPath || 'lxgw-default'}-${fontData.length}`
 
-  const signature = `${customFontPath || 'default'}-${fontData.length}`
   if (!rendererInstance || loadedFontSignature !== signature) {
     rendererInstance = new (Renderer as any)({ fonts: [fontData] })
     loadedFontSignature = signature
@@ -33,6 +31,7 @@ function getRenderer(customFontPath?: string): Renderer {
  * 使用 Takumi WASM 渲染精美的撤回审计报告卡片大图
  */
 export async function renderRecallCard(
+  ctx: Context,
   storedMsg: StoredMessage,
   options: TakumiRenderOptions
 ): Promise<Buffer> {
@@ -238,7 +237,7 @@ export async function renderRecallCard(
     ]
   })
 
-  const renderer = getRenderer(options.fontPath)
+  const renderer = await getRenderer(ctx, options.fontPath)
   const rendered = await renderer.render(rootNode, { width, format: 'png' })
   return Buffer.from(rendered)
 }

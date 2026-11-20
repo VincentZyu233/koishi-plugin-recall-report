@@ -110,7 +110,7 @@ export const Config: Schema<Config> = Schema.intersect([
 
     takumiFontPath: Schema.string()
       .default('')
-      .description('🔤 自定义中文字体绝对路径 (留空将自动从工作区或系统依次探测)'),
+      .description('🔤 Takumi 自定义字体路径；留空时自动下载并使用 LXGW 文楷'),
   }).description('⚙️ 交付形式与渲染引擎设置'),
 
   Schema.object({

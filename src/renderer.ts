@@ -52,7 +52,7 @@ export class RecallRenderer {
     let takumiMessage: h[] | null = null
     if (modes.includes('takumi')) {
       try {
-        const pngBuffer = await renderRecallCard(storedMsg, {
+        const pngBuffer = await renderRecallCard(this.ctx, storedMsg, {
           width: this.config.takumiWidth,
           darkMode: this.config.takumiDarkMode,
           fontPath: this.config.takumiFontPath,
