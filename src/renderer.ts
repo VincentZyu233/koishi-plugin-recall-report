@@ -71,47 +71,31 @@ export class RecallRenderer {
       ? storedMsg.elements
       : [h.text(storedMsg.content || '')]
 
-    // 4. 执行发送到主人账号 (私聊推送)
+    // 4. 执行发送到主人账号 (私聊推送：所有平台匹配的 Bot 全部发送)
     if (groupConfig.sendToMaster) {
       const masters = this.utils.getEnabledMasters()
       for (const master of masters) {
-        try {
-          // 核心修复：多 Bot 场景优先使用在线且正常运行的 Bot
-          // 1. 优先使用当前捕获撤回事件的 session.bot（如果属于对应平台且在线）
-          // 2. 其次从全部 bots 中筛选状态为 online 的对应平台 Bot
-          // 3. 彻底避免误选离线或未连接的同平台 Bot 实例
-          let targetBot: Bot | undefined
-          const isOnline = (b?: Bot) => {
-            if (!b) return false
-            const st: any = b.status
-            return st === 1 || st === 'online' || st === 'ONLINE' || Boolean((b as any).isActive)
+        // 直接获取所有平台匹配的 Bot 实例，全部逐一发送
+        const candidateBots = this.ctx.bots.filter(b => b.platform === master.platform)
+        if (candidateBots.length === 0) {
+          logger.warn(`未找到接收平台 [${master.platform}] 的任何 Bot 实例，跳过向主人上报`)
+          continue
+        }
+
+        for (const targetBot of candidateBots) {
+          try {
+            logger.info(`尝试通过 Bot [${targetBot.selfId}] 向主人 [${master.platform}:${master.userId}] 投递撤回报告...`)
+            await this.sendDeliveries(targetBot, master.userId, true, {
+              modes,
+              textAvatarMessage,
+              takumiMessage,
+              rawElements,
+              storedMsg,
+            })
+            logger.info(`已成功通过 Bot [${targetBot.selfId}] 向主人 [${master.platform}:${master.userId}] 投递撤回报告 (共 ${modes.length} 条消息)`)
+          } catch (err) {
+            logger.warn(`通过 Bot [${targetBot.selfId}] 发送撤回报告失败:`, err)
           }
-
-          if (session.bot && session.bot.platform === master.platform && isOnline(session.bot)) {
-            targetBot = session.bot
-          } else {
-            targetBot = this.ctx.bots.find(b => b.platform === master.platform && isOnline(b))
-              || (session.bot?.platform === master.platform ? session.bot : undefined)
-              || this.ctx.bots.find(b => b.platform === master.platform)
-          }
-
-          if (!targetBot) {
-            logger.warn(`未找到接收平台 [${master.platform}] 的可用 Bot 实例，跳过向主人上报`)
-            continue
-          }
-
-          logger.info(`向主人 [${master.platform}:${master.userId}] 选用 Bot [${targetBot.selfId}] (状态: ${targetBot.status}) 投递撤回报告`)
-
-          await this.sendDeliveries(targetBot, master.userId, true, {
-            modes,
-            textAvatarMessage,
-            takumiMessage,
-            rawElements,
-            storedMsg,
-          })
-          logger.info(`已成功向主人 [${master.platform}:${master.userId}] 投递撤回报告 (共 ${modes.length} 条消息)`)
-        } catch (err) {
-          logger.error(`向主人 [${master.platform}:${master.userId}] 发送撤回报告失败:`, err)
         }
       }
     }
