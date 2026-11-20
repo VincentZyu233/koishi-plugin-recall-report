@@ -76,7 +76,7 @@ export const Config: Schema<Config> = Schema.intersect([
         .default(''),
       channelId: Schema.string()
         .description('群号或频道 ID')
-        .default('259248174'),
+        .default('1085190201'),
       sendToMaster: Schema.boolean()
         .description('是否发送给主人账号')
         .default(true),
@@ -85,7 +85,7 @@ export const Config: Schema<Config> = Schema.intersect([
         .default(false),
     }))
       .role('table')
-      .default([{ enabled: true, platform: '', channelId: '259248174', sendToMaster: true, sendToGroup: false }])
+      .default([{ enabled: true, platform: '', channelId: '1085190201', sendToMaster: true, sendToGroup: false }])
       .description('📋 监听群组/频道列表'),
   }).description('📋 监听目标配置'),
 
