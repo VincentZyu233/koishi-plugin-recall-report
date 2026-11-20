@@ -134,10 +134,8 @@ export async function renderTakumiCard(
                 style: {
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
                 },
                 children: [
-                  text('📢', { fontSize: 20 }),
                   text('消息撤回审计报告', {
                     fontSize: 18,
                     fontWeight: 700,
@@ -177,7 +175,7 @@ export async function renderTakumiCard(
                   gap: 6,
                 },
                 children: [
-                  text('👤 发送者：', { fontSize: 13, color: theme.textSecondary, fontWeight: 600 }),
+                  text('发送者：', { fontSize: 13, color: theme.textSecondary, fontWeight: 600 }),
                   text(`${storedMsg.username}`, { fontSize: 14, color: theme.textPrimary, fontWeight: 700 }),
                   text(`(${storedMsg.userId})`, { fontSize: 12, color: theme.textSecondary }),
                 ]
@@ -189,7 +187,7 @@ export async function renderTakumiCard(
                   gap: 6,
                 },
                 children: [
-                  text('⏱️ 撤回时间：', { fontSize: 13, color: theme.textSecondary }),
+                  text('撤回时间：', { fontSize: 13, color: theme.textSecondary }),
                   text(`${options.recallTime}`, { fontSize: 13, color: theme.textPrimary }),
                 ]
               }),
@@ -200,7 +198,7 @@ export async function renderTakumiCard(
                   gap: 6,
                 },
                 children: [
-                  text('🕒 原发送时间：', { fontSize: 13, color: theme.textSecondary }),
+                  text('原发送时间：', { fontSize: 13, color: theme.textSecondary }),
                   text(`${options.originalTime}`, { fontSize: 13, color: theme.textPrimary }),
                 ]
               }),
@@ -219,7 +217,7 @@ export async function renderTakumiCard(
               gap: 8,
             },
             children: [
-              text('📝 原消息内容：', {
+              text('原消息内容：', {
                 fontSize: 12,
                 fontWeight: 600,
                 color: theme.accent,
@@ -243,7 +241,7 @@ export async function renderTakumiCard(
           gap: 6,
         },
         children: [
-          text('🦀 Takumi WASM 极速渲染 · recall-report v0.3.0', {
+          text('Takumi WASM 极速渲染 · recall-report v0.3.0', {
             fontSize: 11,
             color: theme.footerText,
           }),
