@@ -5,6 +5,10 @@
 
 基于 Satori 协议的标准全平台消息撤回监听与自适应审计报告插件。
 
+<p align="center">
+  <img src="docs/images/preview.jpg" alt="撤回监听与报告预览" width="420" />
+</p>
+
 ---
 
 ## ✨ 核心特性
@@ -15,6 +19,14 @@
   - **Discord / KOOK / 其它平台**：自适应降级为“标准 Markdown 引用与富文本”，避免协议不支持报错。
 - **🖼️ 跨平台头像标准化**：优先读取 Satori Universal 规范的 CDN 头像，兼顾 OneBot 历史回退。
 - **🛡️ 复合命名空间存储**：基于 `${platform}:${channelId}:${messageId}` 严格隔离，多平台多 Bot 并行绝不撞车，内置 LRU 队列与 TTL 自动释放机制。
+
+---
+
+## 📸 效果展示
+
+<p align="center">
+  <img src="docs/images/preview.jpg" alt="撤回审计效果详情" width="380" />
+</p>
 
 ---
 
