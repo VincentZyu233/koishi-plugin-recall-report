@@ -25,14 +25,6 @@
 
 ---
 
-## 📸 效果展示
-
-<p align="center">
-  <img src="docs/images/preview.jpg" alt="撤回审计效果详情" width="380" />
-</p>
-
----
-
 ## 📦 安装与启用
 
 在 Koishi 控制台插件市场搜索 `recall-report` 并安装启用。
