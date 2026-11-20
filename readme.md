@@ -6,7 +6,7 @@
 基于 Satori 协议的标准全平台消息撤回监听与自适应审计报告插件，内置 Takumi WASM 毫秒级极速出图引擎。
 
 <p align="center">
-  <img src="docs/images/preview.jpg" alt="撤回监听与报告预览" width="420" />
+  <img src="docs/images/preview.text-and-image.forward.png" alt="撤回监听与报告预览" width="420" />
 </p>
 
 ---
